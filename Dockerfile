@@ -9,15 +9,15 @@ ARG TAG_TORTOISE
 ARG TAG_TORTOISECUDA
 
 # COPY can't handle variables, so here we go
-FROM pennlinc/qsirecon-freesurfer:${TAG_FREESURFER} as build_freesurfer
-FROM pennlinc/qsirecon-ants:${TAG_ANTS} as build_ants
-FROM pennlinc/qsirecon-mrtrix3:${TAG_MRTRIX3} as build_mrtrix3
-FROM pennlinc/qsirecon-3tissue:${TAG_3TISSUE} as build_3tissue
-FROM pennlinc/qsirecon-dsistudio:${TAG_DSISTUDIO} as build_dsistudio
-FROM pennlinc/qsirecon-micromamba:${TAG_MICROMAMBA} as build_micromamba
-FROM pennlinc/qsirecon-afni:${TAG_AFNI} as build_afni
-FROM pennlinc/qsirecon-drbuddi:${TAG_TORTOISE} as build_tortoise
-FROM pennlinc/qsirecon-drbuddicuda:${TAG_TORTOISE} as build_tortoisecuda
+FROM pennbbl/qsiprep-freesurfer:${TAG_FREESURFER} as build_freesurfer
+FROM pennbbl/qsiprep-ants:${TAG_ANTS} as build_ants
+FROM pennbbl/qsiprep-mrtrix3:${TAG_MRTRIX3} as build_mrtrix3
+FROM pennbbl/qsiprep-3tissue:${TAG_3TISSUE} as build_3tissue
+FROM pennbbl/qsiprep-dsistudio:${TAG_DSISTUDIO} as build_dsistudio
+FROM pennbbl/qsiprep-micromamba:${TAG_MICROMAMBA} as build_micromamba
+FROM pennbbl/qsiprep-afni:${TAG_AFNI} as build_afni
+FROM pennbbl/qsiprep-drbuddi:${TAG_TORTOISE} as build_tortoise
+FROM pennbbl/qsiprep-drbuddicuda:${TAG_TORTOISE} as build_tortoisecuda
 FROM pennlinc/atlaspack:0.1.0 as atlaspack
 FROM nvidia/cuda:11.1.1-runtime-ubuntu18.04 as ubuntu
 
