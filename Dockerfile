@@ -1,5 +1,3 @@
-ARG TAG_FSL
-ARG TAG_FREESURFER
 ARG TAG_ANTS
 ARG TAG_MRTRIX3
 ARG TAG_3TISSUE
@@ -9,13 +7,7 @@ ARG TAG_AFNI
 ARG TAG_TORTOISE
 ARG TAG_TORTOISECUDA
 
-# TO include FSL set --build-arg FSL_BUILD=build_fsl
-# To skip it set --build-arg FSL_BUILD=no_fsl
-ARG FSL_BUILD
-
 # COPY can't handle variables, so here we go
-FROM pennlinc/qsirecon-fsl:${TAG_FSL} as build_fsl
-FROM pennlinc/qsirecon-freesurfer:${TAG_FREESURFER} as build_freesurfer
 FROM pennlinc/qsirecon-ants:${TAG_ANTS} as build_ants
 FROM pennlinc/qsirecon-mrtrix3:${TAG_MRTRIX3} as build_mrtrix3
 FROM pennlinc/qsirecon-3tissue:${TAG_3TISSUE} as build_3tissue
@@ -27,26 +19,7 @@ FROM pennlinc/qsirecon-drbuddicuda:${TAG_TORTOISE} as build_tortoisecuda
 FROM pennlinc/atlaspack:0.1.0 as atlaspack
 FROM nvidia/cuda:11.1.1-runtime-ubuntu18.04 as ubuntu
 
-# Make a dummy fsl image containing no FSL
-FROM ubuntu as no_fsl
-RUN mkdir -p /opt/conda/envs/fslqsirecon/bin \
-    && touch /opt/conda/envs/fslqsirecon/bin/eddy_cuda10.2
-
-FROM ${FSL_BUILD} as this-fsl
-
 FROM ubuntu
-## FSL
-COPY --from=this-fsl /opt/conda/envs/fslqsirecon /opt/conda/envs/fslqsirecon
-ENV FSLDIR="/opt/conda/envs/fslqsirecon" \
-    FSLOUTPUTTYPE="NIFTI_GZ" \
-    FSLMULTIFILEQUIT="TRUE" \
-    FSLLOCKDIR="" \
-    FSLMACHINELIST="" \
-    FSLREMOTECALL="" \
-    FSLGECUDAQ="cuda.q" \
-    PATH="/opt/conda/envs/fslqsirecon/bin:$PATH" \
-    FSL_DEPS="libquadmath0" \
-    FSL_BUILD="${FSL_BUILD}"
 
 ## ANTs
 COPY --from=build_ants /opt/ants /opt/ants
@@ -70,28 +43,6 @@ COPY --from=build_3tissue /opt/3Tissue /opt/3Tissue
 ENV PATH="$PATH:/opt/mrtrix3-latest/bin:/opt/3Tissue/bin" \
     MRTRIX3_DEPS="bzip2 ca-certificates curl libpng16-16 libblas3 liblapack3"
 
-## Freesurfer
-COPY --from=build_freesurfer /opt/freesurfer /opt/freesurfer
-# Simulate SetUpFreeSurfer.sh
-ENV FSL_DIR="/opt/conda/envs/fslqsirecon" \
-    OS="Linux" \
-    FS_OVERRIDE=0 \
-    FIX_VERTEX_AREA="" \
-    FSF_OUTPUT_FORMAT="nii.gz" \
-    FREESURFER_HOME="/opt/freesurfer"
-ENV SUBJECTS_DIR="$FREESURFER_HOME/subjects" \
-    FUNCTIONALS_DIR="$FREESURFER_HOME/sessions" \
-    MNI_DIR="$FREESURFER_HOME/mni" \
-    LOCAL_DIR="$FREESURFER_HOME/local" \
-    MINC_BIN_DIR="$FREESURFER_HOME/mni/bin" \
-    MINC_LIB_DIR="$FREESURFER_HOME/mni/lib" \
-    MNI_DATAPATH="$FREESURFER_HOME/mni/data"
-ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
-    MNI_PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
-    PATH="$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH" \
-    FREESURFER_DEPS="bc ca-certificates curl libgomp1 libxmu6 libxt6 tcsh perl"
-RUN chmod a+rx /opt/freesurfer/bin/mri_synthseg /opt/freesurfer/bin/mri_synthstrip
-
 ## AFNI
 COPY --from=build_afni /opt/afni-latest /opt/afni-latest
 ENV PATH="$PATH:/opt/afni-latest" \
@@ -106,7 +57,7 @@ COPY --from=build_tortoisecuda /src/TORTOISEV4/bin/*cuda /src/TORTOISEV4/bin/
 ENV PATH="$PATH:/src/TORTOISEV4/bin" \
     TORTOISE_DEPS="fftw3"
 
-    # Create a shared $HOME directory
+# Create a shared $HOME directory
 RUN useradd -m -s /bin/bash -G users qsirecon
 WORKDIR /home/qsirecon
 
