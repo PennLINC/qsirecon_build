@@ -3,7 +3,7 @@ version: 2.1
 build: &build
   docker:
     - image: cimg/base:2020.09
-  working_directory: /tmp/src/qsiprep_build
+  working_directory: /tmp/src/qsirecon_build
   steps:
     - checkout
     - setup_remote_docker:
@@ -43,11 +43,11 @@ build: &build
             --rm=false \
             -f ${BUILD_FILE} \
             --build-arg TAG_ANTS=${TAG_ANTS} \
-            -t pennbbl/${IMG_NAME}:${CIRCLE_TAG} .
+            -t pennlinc/${IMG_NAME}:${CIRCLE_TAG} .
 
           if [[ -n "$DOCKER_PASS" ]]; then
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker push pennbbl/${IMG_NAME}:$CIRCLE_TAG
+            docker push pennlinc/${IMG_NAME}:$CIRCLE_TAG
           fi
 
 jobs:
@@ -55,49 +55,49 @@ jobs:
   build_FSL:
     environment:
       VERSION_TAG: "TAG_FSL"
-      IMG_NAME: "qsiprep-fsl"
+      IMG_NAME: "qsirecon-fsl"
       BUILD_FILE: "Dockerfile_FSLconda"
     <<: *build
 
   build_FreeSurfer:
     environment:
       VERSION_TAG: "TAG_FREESURFER"
-      IMG_NAME: "qsiprep-freesurfer"
+      IMG_NAME: "qsirecon-freesurfer"
       BUILD_FILE: "Dockerfile_FreeSurfer"
     <<: *build
 
   build_3Tissue:
     environment:
       VERSION_TAG: "TAG_3TISSUE"
-      IMG_NAME: "qsiprep-3tissue"
+      IMG_NAME: "qsirecon-3tissue"
       BUILD_FILE: "Dockerfile_3Tissue"
     <<: *build
 
   build_MRtrix3:
     environment:
       VERSION_TAG: "TAG_MRTRIX3"
-      IMG_NAME: "qsiprep-mrtrix3"
+      IMG_NAME: "qsirecon-mrtrix3"
       BUILD_FILE: "Dockerfile_MRtrix3"
     <<: *build
 
   build_AFNI:
     environment:
       VERSION_TAG: "TAG_AFNI"
-      IMG_NAME: "qsiprep-afni"
+      IMG_NAME: "qsirecon-afni"
       BUILD_FILE: "Dockerfile_AFNI"
     <<: *build
 
   build_DSIStudio:
     environment:
       VERSION_TAG: "TAG_DSISTUDIO"
-      IMG_NAME: "qsiprep-dsistudio"
+      IMG_NAME: "qsirecon-dsistudio"
       BUILD_FILE: "Dockerfile_DSIStudio"
     <<: *build
 
   build_ANTs:
     environment:
       VERSION_TAG: "TAG_ANTS"
-      IMG_NAME: "qsiprep-ants"
+      IMG_NAME: "qsirecon-ants"
       BUILD_FILE: "Dockerfile_ANTs"
     resource_class: large
     <<: *build
@@ -105,28 +105,28 @@ jobs:
   build_Miniconda:
     environment:
       VERSION_TAG: "TAG_MINICONDA"
-      IMG_NAME: "qsiprep-miniconda"
+      IMG_NAME: "qsirecon-miniconda"
       BUILD_FILE: "Dockerfile_Miniconda"
     <<: *build
 
   build_Micromamba:
     environment:
       VERSION_TAG: "TAG_MICROMAMBA"
-      IMG_NAME: "qsiprep-micromamba"
+      IMG_NAME: "qsirecon-micromamba"
       BUILD_FILE: "Dockerfile_Micromamba"
     <<: *build
 
   build_TORTOISE:
     environment:
       VERSION_TAG: "TAG_TORTOISE"
-      IMG_NAME: "qsiprep-drbuddi"
+      IMG_NAME: "qsirecon-drbuddi"
       BUILD_FILE: "Dockerfile_TORTOISE"
     <<: *build
 
   build_TORTOISECUDA:
     environment:
       VERSION_TAG: "TAG_TORTOISECUDA"
-      IMG_NAME: "qsiprep-drbuddicuda"
+      IMG_NAME: "qsirecon-drbuddicuda"
       BUILD_FILE: "Dockerfile_TORTOISEcuda"
     <<: *build
 
@@ -135,7 +135,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/New_York"
     docker:
       - image: cimg/base:2020.09
-    working_directory: /tmp/src/qsiprep_build
+    working_directory: /tmp/src/qsirecon_build
     steps:
       - checkout
       - setup_remote_docker:
@@ -149,7 +149,7 @@ jobs:
               source setup_build.sh
               do_build build_fsl
               docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker push pennbbl/qsiprep_build:$CIRCLE_TAG
+              docker push pennlinc/qsirecon_build:$CIRCLE_TAG
             fi
 
   build_nofsl:
@@ -157,7 +157,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/America/New_York"
     docker:
       - image: cimg/base:2020.09
-    working_directory: /tmp/src/qsiprep_build
+    working_directory: /tmp/src/qsirecon_build
     steps:
       - checkout
       - setup_remote_docker:
@@ -171,7 +171,7 @@ jobs:
               source setup_build.sh
               do_build no_fsl
               docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker push pennbbl/qsiprep_build:${CIRCLE_TAG}-nofsl
+              docker push pennlinc/qsirecon_build:${CIRCLE_TAG}-nofsl
             fi
 
   deployable:

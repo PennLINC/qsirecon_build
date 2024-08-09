@@ -14,37 +14,37 @@ ARG TAG_TORTOISECUDA
 ARG FSL_BUILD
 
 # COPY can't handle variables, so here we go
-FROM pennbbl/qsiprep-fsl:${TAG_FSL} as build_fsl
-FROM pennbbl/qsiprep-freesurfer:${TAG_FREESURFER} as build_freesurfer
-FROM pennbbl/qsiprep-ants:${TAG_ANTS} as build_ants
-FROM pennbbl/qsiprep-mrtrix3:${TAG_MRTRIX3} as build_mrtrix3
-FROM pennbbl/qsiprep-3tissue:${TAG_3TISSUE} as build_3tissue
-FROM pennbbl/qsiprep-dsistudio:${TAG_DSISTUDIO} as build_dsistudio
-FROM pennbbl/qsiprep-micromamba:${TAG_MICROMAMBA} as build_micromamba
-FROM pennbbl/qsiprep-afni:${TAG_AFNI} as build_afni
-FROM pennbbl/qsiprep-drbuddi:${TAG_TORTOISE} as build_tortoise
-FROM pennbbl/qsiprep-drbuddicuda:${TAG_TORTOISE} as build_tortoisecuda
+FROM pennlinc/qsirecon-fsl:${TAG_FSL} as build_fsl
+FROM pennlinc/qsirecon-freesurfer:${TAG_FREESURFER} as build_freesurfer
+FROM pennlinc/qsirecon-ants:${TAG_ANTS} as build_ants
+FROM pennlinc/qsirecon-mrtrix3:${TAG_MRTRIX3} as build_mrtrix3
+FROM pennlinc/qsirecon-3tissue:${TAG_3TISSUE} as build_3tissue
+FROM pennlinc/qsirecon-dsistudio:${TAG_DSISTUDIO} as build_dsistudio
+FROM pennlinc/qsirecon-micromamba:${TAG_MICROMAMBA} as build_micromamba
+FROM pennlinc/qsirecon-afni:${TAG_AFNI} as build_afni
+FROM pennlinc/qsirecon-drbuddi:${TAG_TORTOISE} as build_tortoise
+FROM pennlinc/qsirecon-drbuddicuda:${TAG_TORTOISE} as build_tortoisecuda
 FROM pennlinc/atlaspack:0.1.0 as atlaspack
 FROM nvidia/cuda:11.1.1-runtime-ubuntu18.04 as ubuntu
 
 # Make a dummy fsl image containing no FSL
 FROM ubuntu as no_fsl
-RUN mkdir -p /opt/conda/envs/fslqsiprep/bin \
-    && touch /opt/conda/envs/fslqsiprep/bin/eddy_cuda10.2
+RUN mkdir -p /opt/conda/envs/fslqsirecon/bin \
+    && touch /opt/conda/envs/fslqsirecon/bin/eddy_cuda10.2
 
 FROM ${FSL_BUILD} as this-fsl
 
 FROM ubuntu
 ## FSL
-COPY --from=this-fsl /opt/conda/envs/fslqsiprep /opt/conda/envs/fslqsiprep
-ENV FSLDIR="/opt/conda/envs/fslqsiprep" \
+COPY --from=this-fsl /opt/conda/envs/fslqsirecon /opt/conda/envs/fslqsirecon
+ENV FSLDIR="/opt/conda/envs/fslqsirecon" \
     FSLOUTPUTTYPE="NIFTI_GZ" \
     FSLMULTIFILEQUIT="TRUE" \
     FSLLOCKDIR="" \
     FSLMACHINELIST="" \
     FSLREMOTECALL="" \
     FSLGECUDAQ="cuda.q" \
-    PATH="/opt/conda/envs/fslqsiprep/bin:$PATH" \
+    PATH="/opt/conda/envs/fslqsirecon/bin:$PATH" \
     FSL_DEPS="libquadmath0" \
     FSL_BUILD="${FSL_BUILD}"
 
@@ -73,7 +73,7 @@ ENV PATH="$PATH:/opt/mrtrix3-latest/bin:/opt/3Tissue/bin" \
 ## Freesurfer
 COPY --from=build_freesurfer /opt/freesurfer /opt/freesurfer
 # Simulate SetUpFreeSurfer.sh
-ENV FSL_DIR="/opt/conda/envs/fslqsiprep" \
+ENV FSL_DIR="/opt/conda/envs/fslqsirecon" \
     OS="Linux" \
     FS_OVERRIDE=0 \
     FIX_VERTEX_AREA="" \
@@ -107,13 +107,13 @@ ENV PATH="$PATH:/src/TORTOISEV4/bin" \
     TORTOISE_DEPS="fftw3"
 
     # Create a shared $HOME directory
-RUN useradd -m -s /bin/bash -G users qsiprep
-WORKDIR /home/qsiprep
+RUN useradd -m -s /bin/bash -G users qsirecon
+WORKDIR /home/qsirecon
 
 ## Python, compiled dependencies
-COPY --from=build_micromamba /opt/conda/envs/qsiprep /opt/conda/envs/qsiprep
-COPY --from=build_micromamba /home/qsiprep/.dipy /home/qsiprep/.dipy
-ENV PATH="/opt/conda/envs/qsiprep/bin:$PATH"
+COPY --from=build_micromamba /opt/conda/envs/qsirecon /opt/conda/envs/qsirecon
+COPY --from=build_micromamba /home/qsirecon/.dipy /home/qsirecon/.dipy
+ENV PATH="/opt/conda/envs/qsirecon/bin:$PATH"
 
 RUN apt-get update -qq \
     && apt-get install -y -q --no-install-recommends \
@@ -211,7 +211,7 @@ RUN cd /opt/art \
 # Unless otherwise specified each process should only use one thread - nipype
 # will handle parallelization
 ENV \
-    HOME="/home/qsiprep" \
+    HOME="/home/qsirecon" \
     MKL_NUM_THREADS=1 \
     OMP_NUM_THREADS=1 \
     MRTRIX_NTHREADS=1 \
@@ -219,12 +219,12 @@ ENV \
     CRN_SHARED_DATA=/niworkflows_data \
     IS_DOCKER_8395080871=1 \
     ARTHOME="/opt/art" \
-    DIPY_HOME=/home/qsiprep/.dipy \
+    DIPY_HOME=/home/qsirecon/.dipy \
     QTDIR=$QT_BASE_DIR \
     PATH=$QT_BASE_DIR/bin:$PATH \
     LD_LIBRARY_PATH=$QT_BASE_DIR/lib/x86_64-linux-gnu:$QT_BASE_DIR/lib:$LD_LIBRARY_PATH \
     PKG_CONFIG_PATH=$QT_BASE_DIR/lib/pkgconfig:$PKG_CONFIG_PATH \
-    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/conda/envs/qsiprep/lib/python3.10/site-packages/nvidia/cudnn/lib
+    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/conda/envs/qsirecon/lib/python3.10/site-packages/nvidia/cudnn/lib
 
 WORKDIR /root/
 
@@ -258,7 +258,7 @@ RUN pyAFQ download
 
 # Make singularity mount directories
 RUN  mkdir -p /sngl/data \
-  && mkdir /sngl/qsiprep-output \
+  && mkdir /sngl/qsirecon-output \
   && mkdir /sngl/out \
   && mkdir /sngl/scratch \
   && mkdir /sngl/spec \

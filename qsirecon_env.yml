@@ -1,4 +1,4 @@
-name: qsiprep
+name: qsirecon
 channels:
   - conda-forge
 dependencies:
