@@ -52,20 +52,6 @@ build: &build
 
 jobs:
 
-  build_FSL:
-    environment:
-      VERSION_TAG: "TAG_FSL"
-      IMG_NAME: "qsirecon-fsl"
-      BUILD_FILE: "Dockerfile_FSLconda"
-    <<: *build
-
-  build_FreeSurfer:
-    environment:
-      VERSION_TAG: "TAG_FREESURFER"
-      IMG_NAME: "qsirecon-freesurfer"
-      BUILD_FILE: "Dockerfile_FreeSurfer"
-    <<: *build
-
   build_3Tissue:
     environment:
       VERSION_TAG: "TAG_3TISSUE"
@@ -142,36 +128,14 @@ jobs:
          version: docker24
 
       - run:
-          name: Build with FSL and push
+          name: Build and push
           no_output_timeout: 5h
           command: |
             if [[ -n "$CIRCLE_TAG" ]]; then
               source setup_build.sh
-              do_build build_fsl
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
+              do_build
+              docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_TOKEN
               docker push pennlinc/qsirecon_build:$CIRCLE_TAG
-            fi
-
-  build_nofsl:
-    environment:
-      TZ: "/usr/share/zoneinfo/America/New_York"
-    docker:
-      - image: cimg/base:2020.09
-    working_directory: /tmp/src/qsirecon_build
-    steps:
-      - checkout
-      - setup_remote_docker:
-         version: docker24
-
-      - run:
-          name: Build without FSL and push
-          no_output_timeout: 5h
-          command: |
-            if [[ -n "$CIRCLE_TAG" ]]; then
-              source setup_build.sh
-              do_build no_fsl
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker push pennlinc/qsirecon_build:${CIRCLE_TAG}-nofsl
             fi
 
   deployable:
@@ -184,16 +148,6 @@ workflows:
   version: 2
   build_test_deploy:
     jobs:
-      - build_FSL:
-          filters:
-            tags:
-              only: /.*/
-
-      - build_FreeSurfer:
-          filters:
-            tags:
-              only: /.*/
-
       - build_3Tissue:
           filters:
             tags:
@@ -240,8 +194,6 @@ workflows:
 
       - deployable:
           requires:
-            - build_FSL
-            - build_FreeSurfer
             - build_3Tissue
             - build_MRtrix3
             - build_DSIStudio
@@ -255,13 +207,6 @@ workflows:
               only: /.*/
 
       - build:
-          requires:
-            - deployable
-          filters:
-            tags:
-              only: /.*/
-
-      - build_nofsl:
           requires:
             - deployable
           filters:

@@ -53,18 +53,4 @@ RUN apt-get update -qq \
     --exclude "linux_openmp_64/meica.libs" \
     # Keep only what we use \
     && find /opt/afni-latest -type f -not \( \
-        -name "3drefit" -or \
-        -name "3dcalc" -or \
-        -name "3dresample" -or \
-        -name "3dFWHMx" -or \
-        -name "3dAutobox" -or \
-        -name "3dSkullStrip" -or \
-        -name "3dAutomask" -or \
-        -name "3dWarp" -or \
-        -name "3dTcat" -or \
-        -name "3dTstat" -or \
-        -name "3dQwarp" -or \
-        -name "3dSeg" -or \
-        -name "3dZeropad" -or \
-        -name "3dTsplit4D" -or \
-        -name "3dvolreg" \) -delete
+        -name "3dAutomask" \) -delete
