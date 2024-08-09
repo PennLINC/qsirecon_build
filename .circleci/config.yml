@@ -52,6 +52,13 @@ build: &build
 
 jobs:
 
+  build_FreeSurfer:
+    environment:
+      VERSION_TAG: "TAG_FREESURFER"
+      IMG_NAME: "qsirecon-freesurfer"
+      BUILD_FILE: "Dockerfile_FreeSurfer"
+    <<: *build
+
   build_3Tissue:
     environment:
       VERSION_TAG: "TAG_3TISSUE"
@@ -148,6 +155,11 @@ workflows:
   version: 2
   build_test_deploy:
     jobs:
+      - build_FreeSurfer:
+          filters:
+            tags:
+              only: /.*/
+
       - build_3Tissue:
           filters:
             tags:
@@ -194,6 +206,7 @@ workflows:
 
       - deployable:
           requires:
+            - build_FreeSurfer
             - build_3Tissue
             - build_MRtrix3
             - build_DSIStudio

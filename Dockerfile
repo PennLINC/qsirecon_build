@@ -1,3 +1,4 @@
+ARG TAG_FREESURFER
 ARG TAG_ANTS
 ARG TAG_MRTRIX3
 ARG TAG_3TISSUE
@@ -8,6 +9,7 @@ ARG TAG_TORTOISE
 ARG TAG_TORTOISECUDA
 
 # COPY can't handle variables, so here we go
+FROM pennlinc/qsirecon-freesurfer:${TAG_FREESURFER} as build_freesurfer
 FROM pennlinc/qsirecon-ants:${TAG_ANTS} as build_ants
 FROM pennlinc/qsirecon-mrtrix3:${TAG_MRTRIX3} as build_mrtrix3
 FROM pennlinc/qsirecon-3tissue:${TAG_3TISSUE} as build_3tissue
@@ -42,6 +44,28 @@ COPY --from=build_mrtrix3 /opt/mrtrix3-latest /opt/mrtrix3-latest
 COPY --from=build_3tissue /opt/3Tissue /opt/3Tissue
 ENV PATH="$PATH:/opt/mrtrix3-latest/bin:/opt/3Tissue/bin" \
     MRTRIX3_DEPS="bzip2 ca-certificates curl libpng16-16 libblas3 liblapack3"
+
+## Freesurfer
+COPY --from=build_freesurfer /opt/freesurfer /opt/freesurfer
+# Simulate SetUpFreeSurfer.sh
+ENV FSL_DIR="/opt/conda/envs/fslqsirecon" \
+    OS="Linux" \
+    FS_OVERRIDE=0 \
+    FIX_VERTEX_AREA="" \
+    FSF_OUTPUT_FORMAT="nii.gz" \
+    FREESURFER_HOME="/opt/freesurfer"
+ENV SUBJECTS_DIR="$FREESURFER_HOME/subjects" \
+    FUNCTIONALS_DIR="$FREESURFER_HOME/sessions" \
+    MNI_DIR="$FREESURFER_HOME/mni" \
+    LOCAL_DIR="$FREESURFER_HOME/local" \
+    MINC_BIN_DIR="$FREESURFER_HOME/mni/bin" \
+    MINC_LIB_DIR="$FREESURFER_HOME/mni/lib" \
+    MNI_DATAPATH="$FREESURFER_HOME/mni/data"
+ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
+    MNI_PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
+    PATH="$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH" \
+    FREESURFER_DEPS="bc ca-certificates curl libgomp1 libxmu6 libxt6 tcsh perl"
+RUN chmod a+rx /opt/freesurfer/bin/mri_synthseg /opt/freesurfer/bin/mri_synthstrip
 
 ## AFNI
 COPY --from=build_afni /opt/afni-latest /opt/afni-latest
