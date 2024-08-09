@@ -134,7 +134,7 @@ jobs:
             if [[ -n "$CIRCLE_TAG" ]]; then
               source setup_build.sh
               do_build
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
+              docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_TOKEN
               docker push pennlinc/qsirecon_build:$CIRCLE_TAG
             fi
 
