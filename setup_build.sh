@@ -49,7 +49,6 @@ do_build() {
         --build-arg TAG_MICROMAMBA=${TAG_MICROMAMBA} \
         --build-arg TAG_AFNI=${TAG_AFNI} \
         --build-arg TAG_TORTOISE=${TAG_TORTOISE} \
-        --build-arg TAG_TORTOISECUDA=${TAG_TORTOISECUDA}
+        --build-arg TAG_TORTOISECUDA=${TAG_TORTOISECUDA} \
         .
-
 }
