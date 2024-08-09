@@ -93,7 +93,7 @@ FROM base
 COPY --from=builder /opt/ants /opt/ants
 COPY --from=builder /tmp/ants /tmp/ants
 
-LABEL maintainer="ANTsX team: Forked by QSIPrep team" \
+LABEL maintainer="ANTsX team: Forked by QSIRecon team" \
       description="ANTs is part of the ANTsX ecosystem (https://github.com/ANTsX). \
 ANTs Citation: https://pubmed.ncbi.nlm.nih.gov/24879923"
 

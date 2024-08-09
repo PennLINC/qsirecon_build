@@ -1,22 +1,22 @@
 .. include:: links.rst
 
-QSIprep: Preprocessing and analysis of q-space images
+QSIRecon: Reconstruction of preprocessed q-space images
 =======================================================
 
-.. image:: https://readthedocs.org/projects/qsiprep/badge/?version=latest
-  :target: http://qsiprep.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/qsirecon/badge/?version=latest
+  :target: http://qsirecon.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
 
-.. image:: https://circleci.com/gh/PennLINC/qsiprep/tree/master.svg?style=svg
-  :target: https://circleci.com/gh/PennLINC/qsiprep/tree/master
+.. image:: https://circleci.com/gh/PennLINC/qsirecon/tree/master.svg?style=svg
+  :target: https://circleci.com/gh/PennLINC/qsirecon/tree/master
 
 
-Full documentation at https://qsiprep.readthedocs.io
+Full documentation at https://qsirecon.readthedocs.io
 
 About
 -----
 
-``qsiprep`` configures pipelines for processing diffusion-weighted MRI (dMRI) data.
+``qsirecon`` configures pipelines for processing diffusion-weighted MRI (dMRI) data.
 The main features of this software are
 
   1. A BIDS-app approach to preprocessing nearly all kinds of modern diffusion MRI data.
@@ -27,7 +27,7 @@ The main features of this software are
      from Dipy_, MRTrix_, `DSI Studio`_  and others.
   4. A novel motion correction algorithm that works on DSI and random q-space sampling schemes
 
-.. image:: https://github.com/PennLINC/qsiprep/raw/master/docs/_static/workflow_full.png
+.. image:: https://github.com/PennLINC/qsirecon/raw/master/docs/_static/workflow_full.png
 
 
 .. _preprocessing_def:
@@ -47,7 +47,7 @@ Reconstruction
 ~~~~~~~~~~~~~~~~
 
 The outputs from the :ref:`preprocessing_def` pipelines can be reconstructed in many other
-software packages. We provide a curated set of :ref:`recon_workflows` in ``qsiprep``
+software packages. We provide a curated set of :ref:`recon_workflows` in ``qsirecon``
 that can run ODF/FOD reconstruction, tractography, Fixel estimation and regional
 connectivity.
 
@@ -56,6 +56,6 @@ connectivity.
 Note
 ------
 
-The ``qsiprep`` pipeline uses much of the code from ``FMRIPREP``. It is critical
+The ``qsirecon`` pipeline uses much of the code from ``FMRIPREP``. It is critical
 to note that the similarities in the code **do not imply that the authors of
 FMRIPREP in any way endorse or support this code or its pipelines**.

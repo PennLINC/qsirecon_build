@@ -42,7 +42,7 @@ echo "Getting NKI template"
 GET "$NKI_TEMPLATE" "$NKI_SHA256"
 echo "Getting OASIS DKT31 template"
 GET "$OASIS_DKT31_TEMPLATE" "$OASIS_DKT31_SHA256"
-echo "Getting qsiprep's BOLDref template"
+echo "Getting qsirecon's BOLDref template"
 GET "$EPI_TEMPLATE" "$EPI_SHA256"
 
 cd $CRN_SHARED_DATA
