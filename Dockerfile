@@ -82,13 +82,14 @@ ENV PATH="$PATH:/src/TORTOISEV4/bin" \
     TORTOISE_DEPS="fftw3"
 
 # Create a shared $HOME directory
-RUN useradd -m -s /bin/bash -G users qsirecon
-WORKDIR /home/qsirecon
+RUN useradd -m -s /bin/bash -G users qsiprep
+WORKDIR /home/qsiprep
 
-## Python, compiled dependencies
-COPY --from=build_micromamba /opt/conda/envs/qsirecon /opt/conda/envs/qsirecon
-COPY --from=build_micromamba /home/qsirecon/.dipy /home/qsirecon/.dipy
-ENV PATH="/opt/conda/envs/qsirecon/bin:$PATH"
+## Python, compiled dependencies. The python files are in /opt/conda/envs/qsiprep
+## because the original build does not care whether it's for qsiprep or qsirecon
+COPY --from=build_micromamba /opt/conda/envs/qsiprep /opt/conda/envs/qsiprep
+COPY --from=build_micromamba /home/qsiprep/.dipy /home/qsirecon/.dipy
+ENV PATH="/opt/conda/envs/qsiprep/bin:$PATH"
 
 RUN apt-get update -qq \
     && apt-get install -y -q --no-install-recommends \
