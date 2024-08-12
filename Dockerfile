@@ -88,7 +88,7 @@ WORKDIR /home/qsiprep
 ## Python, compiled dependencies. The python files are in /opt/conda/envs/qsiprep
 ## because the original build does not care whether it's for qsiprep or qsirecon
 COPY --from=build_micromamba /opt/conda/envs/qsiprep /opt/conda/envs/qsiprep
-COPY --from=build_micromamba /home/qsiprep/.dipy /home/qsirecon/.dipy
+COPY --from=build_micromamba /home/qsiprep/.dipy /home/qsiprep/.dipy
 ENV PATH="/opt/conda/envs/qsiprep/bin:$PATH"
 
 RUN apt-get update -qq \
@@ -187,7 +187,7 @@ RUN cd /opt/art \
 # Unless otherwise specified each process should only use one thread - nipype
 # will handle parallelization
 ENV \
-    HOME="/home/qsirecon" \
+    HOME="/home/qsiprep" \
     MKL_NUM_THREADS=1 \
     OMP_NUM_THREADS=1 \
     MRTRIX_NTHREADS=1 \
@@ -195,7 +195,7 @@ ENV \
     CRN_SHARED_DATA=/niworkflows_data \
     IS_DOCKER_8395080871=1 \
     ARTHOME="/opt/art" \
-    DIPY_HOME=/home/qsirecon/.dipy \
+    DIPY_HOME=/home/qsiprep/.dipy \
     QTDIR=$QT_BASE_DIR \
     PATH=$QT_BASE_DIR/bin:$PATH \
     LD_LIBRARY_PATH=$QT_BASE_DIR/lib/x86_64-linux-gnu:$QT_BASE_DIR/lib:$LD_LIBRARY_PATH \
