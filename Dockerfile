@@ -204,23 +204,27 @@ ENV \
 
 WORKDIR /root/
 
-# Precaching atlases + AtlasPack
+# Precaching templates
+COPY scripts/fetch_templates.py fetch_templates.py
+RUN ${CONDA_PYTHON} -m pip install --no-cache-dir --upgrade templateflow && \
+    ${CONDA_PYTHON} fetch_templates.py && \
+    rm fetch_templates.py && \
+    find $HOME/.cache/templateflow -type d -exec chmod go=u {} + && \
+    find $HOME/.cache/templateflow -type f -exec chmod go=u {} +
+
+# Precaching AtlasPack atlases
 RUN mkdir /AtlasPack
 COPY --from=atlaspack /AtlasPack/tpl-fsLR_*.dlabel.nii /AtlasPack/
 COPY --from=atlaspack /AtlasPack/tpl-MNI152NLin6Asym_*.nii.gz /AtlasPack/
 COPY --from=atlaspack /AtlasPack/tpl-MNI152NLin2009cAsym_*.nii.gz /AtlasPack/
 COPY --from=atlaspack /AtlasPack/atlas-4S*.tsv /AtlasPack/
 COPY --from=atlaspack /AtlasPack/*.json /AtlasPack/
-ADD docker/scripts/get_templates.sh get_templates.sh
-RUN mkdir $CRN_SHARED_DATA && \
-    /root/get_templates.sh && \
-    chmod -R a+rX $CRN_SHARED_DATA
 
 # Make it ok for singularity on CentOS
 RUN strip --remove-section=.note.ABI-tag /opt/qt512/lib/libQt5Core.so.5.12.8 \
     && ldconfig
 
-# Download the atlases
+# Download the built-in atlases
 ENV QSIRECON_ATLAS /atlas/qsirecon_atlases
 RUN bash -c \
     'mkdir /atlas \
