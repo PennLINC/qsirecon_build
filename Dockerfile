@@ -185,6 +185,7 @@ RUN cd /opt/art \
     | tar xz --strip-components 1
 
 # Install Workbench
+RUN apt-get update && apt-get install -y curl unzip binutils
 RUN mkdir /opt/workbench && \
     curl -sSLO https://www.humanconnectome.org/storage/app/media/workbench/workbench-linux64-v1.5.0.zip && \
     unzip workbench-linux64-v1.5.0.zip -d /opt && \
