@@ -184,6 +184,16 @@ RUN cd /opt/art \
     && curl -fsSL https://osf.io/73h5s/download \
     | tar xz --strip-components 1
 
+# Install Workbench
+RUN apt-get update && apt-get install -y curl unzip binutils
+RUN mkdir /opt/workbench && \
+    curl -sSLO https://www.humanconnectome.org/storage/app/media/workbench/workbench-linux64-v1.5.0.zip && \
+    unzip workbench-linux64-v1.5.0.zip -d /opt && \
+    rm workbench-linux64-v1.5.0.zip && \
+    rm -rf /opt/workbench/libs_linux64_software_opengl /opt/workbench/plugins_linux64
+ENV PATH="/opt/workbench/bin_linux64:$PATH" \
+    LD_LIBRARY_PATH="/opt/workbench/lib_linux64:$LD_LIBRARY_PATH"
+
 # Unless otherwise specified each process should only use one thread - nipype
 # will handle parallelization
 ENV \
