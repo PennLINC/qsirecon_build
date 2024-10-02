@@ -9,7 +9,7 @@ ARG TAG_TORTOISE
 ARG TAG_TORTOISECUDA
 
 # COPY can't handle variables, so here we go
-FROM pennbbl/qsirecon-micromamba:${TAG_MICROMAMBA} as build_micromamba
+FROM pennlinc/qsirecon-micromamba:${TAG_MICROMAMBA} as build_micromamba
 FROM pennbbl/qsiprep-freesurfer:${TAG_FREESURFER} as build_freesurfer
 FROM pennbbl/qsiprep-ants:${TAG_ANTS} as build_ants
 FROM pennbbl/qsiprep-mrtrix3:${TAG_MRTRIX3} as build_mrtrix3
