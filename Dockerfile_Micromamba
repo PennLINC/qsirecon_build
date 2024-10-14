@@ -23,7 +23,6 @@
 # SOFTWARE.
 
 FROM nvidia/cuda:11.2.2-devel-ubuntu18.04
-ARG TAG_ANTS
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
