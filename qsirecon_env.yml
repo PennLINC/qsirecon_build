@@ -7,8 +7,13 @@ dependencies:
   - numpy=1.23.5
   - scipy=1.11
   - fury
-  - pip
+  # Workflow dependencies: ANTs
+  - ants=2.5
+  # Workflow dependencies: Convert3d
+  - convert3d=1.4
+  # Python dependencies
   - python=3.10
+  - pip
   - pip:
       - bids-validator==1.14.1
       - coverage

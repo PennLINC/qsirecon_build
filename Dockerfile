@@ -1,5 +1,4 @@
 ARG TAG_FREESURFER
-ARG TAG_ANTS
 ARG TAG_MRTRIX3
 ARG TAG_3TISSUE
 ARG TAG_DSISTUDIO
@@ -11,7 +10,6 @@ ARG TAG_TORTOISECUDA
 # COPY can't handle variables, so here we go
 FROM pennlinc/qsirecon-micromamba:${TAG_MICROMAMBA} as build_micromamba
 FROM pennbbl/qsiprep-freesurfer:${TAG_FREESURFER} as build_freesurfer
-FROM pennbbl/qsiprep-ants:${TAG_ANTS} as build_ants
 FROM pennbbl/qsiprep-mrtrix3:${TAG_MRTRIX3} as build_mrtrix3
 FROM pennbbl/qsiprep-3tissue:${TAG_3TISSUE} as build_3tissue
 FROM pennbbl/qsiprep-dsistudio:${TAG_DSISTUDIO} as build_dsistudio
@@ -22,13 +20,6 @@ FROM pennlinc/atlaspack:0.1.0 as atlaspack
 FROM nvidia/cuda:11.1.1-runtime-ubuntu18.04 as ubuntu
 
 FROM ubuntu
-
-## ANTs
-COPY --from=build_ants /opt/ants /opt/ants
-ENV ANTSPATH="/opt/ants/bin" \
-    LD_LIBRARY_PATH="/opt/ants/lib:$LD_LIBRARY_PATH" \
-    PATH="$PATH:/opt/ants/bin" \
-    ANTS_DEPS="zlib1g-dev"
 
 ## DSI Studio
 ENV QT_BASE_DIR="/opt/qt512"
@@ -135,16 +126,6 @@ RUN apt-get update -qq \
     fi \
     && ldconfig \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-RUN echo "Downloading Convert3D ..." \
-    && mkdir -p /opt/convert3d-nightly \
-    && curl -fsSL --retry 5 https://sourceforge.net/projects/c3d/files/c3d/Nightly/c3d-nightly-Linux-x86_64.tar.gz/download \
-    | tar -xz -C /opt/convert3d-nightly --strip-components 1 \
-    --exclude "c3d-1.0.0-Linux-x86_64/lib" \
-    --exclude "c3d-1.0.0-Linux-x86_64/share" \
-    --exclude "c3d-1.0.0-Linux-x86_64/bin/c3d_gui"
-ENV C3DPATH="/opt/convert3d-nightly" \
-    PATH="/opt/convert3d-nightly/bin:$PATH"
 
 # Prepare environment
 RUN apt-get update && \
