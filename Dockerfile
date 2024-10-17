@@ -219,6 +219,10 @@ COPY --from=atlaspack /AtlasPack/tpl-MNI152NLin2009cAsym_*.nii.gz /AtlasPack/
 COPY --from=atlaspack /AtlasPack/atlas-4S*.tsv /AtlasPack/
 COPY --from=atlaspack /AtlasPack/*.json /AtlasPack/
 
+# Reformat AtlasPack into a BIDS dataset
+COPY scripts/fix_atlaspack.py fix_atlaspack.py
+RUN python fix_atlaspack.py && rm fix_atlaspack.py
+
 # Make it ok for singularity on CentOS
 RUN strip --remove-section=.note.ABI-tag /opt/qt512/lib/libQt5Core.so.5.12.8 \
     && ldconfig
