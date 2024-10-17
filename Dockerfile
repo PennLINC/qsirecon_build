@@ -227,6 +227,10 @@ COPY --from=atlaspack /AtlasPack/atlas-4S*.tsv /atlas/AtlasPack/
 COPY --from=atlaspack /AtlasPack/*.json /atlas/AtlasPack/
 ENV QSIRECON_ATLASPACK /atlas/AtlasPack
 
+# Reformat AtlasPack into a BIDS dataset
+COPY scripts/fix_atlaspack.py fix_atlaspack.py
+RUN python fix_atlaspack.py && rm fix_atlaspack.py
+
 # Download the built-in atlases
 RUN bash -c \
     'cd /atlas \
