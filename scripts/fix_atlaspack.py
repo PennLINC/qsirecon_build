@@ -7,7 +7,7 @@ import shutil
 
 if __name__ == "__main__":
     # Where all the files are located
-    in_dir = "/AtlasPack"
+    in_dir = os.getenv("QSIRECON_ATLASPACK")
 
     with open(os.path.join(in_dir, "dataset_description.json"), "w") as fo:
         json.dump(
