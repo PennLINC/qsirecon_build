@@ -211,30 +211,33 @@ RUN python fetch_templates.py && \
     find $HOME/.cache/templateflow -type d -exec chmod go=u {} + && \
     find $HOME/.cache/templateflow -type f -exec chmod go=u {} +
 
-# Precaching AtlasPack atlases
-RUN mkdir /AtlasPack
-COPY --from=atlaspack /AtlasPack/tpl-fsLR_*.dlabel.nii /AtlasPack/
-COPY --from=atlaspack /AtlasPack/tpl-MNI152NLin6Asym_*.nii.gz /AtlasPack/
-COPY --from=atlaspack /AtlasPack/tpl-MNI152NLin2009cAsym_*.nii.gz /AtlasPack/
-COPY --from=atlaspack /AtlasPack/atlas-4S*.tsv /AtlasPack/
-COPY --from=atlaspack /AtlasPack/*.json /AtlasPack/
+# Make it ok for singularity on CentOS
+RUN strip --remove-section=.note.ABI-tag /opt/qt512/lib/libQt5Core.so.5.12.8 \
+    && ldconfig
+
+# Prepare atlases
+RUN mkdir /atlas
+
+# Download the AtlasPack atlases
+RUN mkdir /atlas/AtlasPack
+COPY --from=atlaspack /AtlasPack/tpl-fsLR_*.dlabel.nii /atlas/AtlasPack/
+COPY --from=atlaspack /AtlasPack/tpl-MNI152NLin6Asym_*.nii.gz /atlas/AtlasPack/
+COPY --from=atlaspack /AtlasPack/tpl-MNI152NLin2009cAsym_*.nii.gz /atlas/AtlasPack/
+COPY --from=atlaspack /AtlasPack/atlas-4S*.tsv /atlas/AtlasPack/
+COPY --from=atlaspack /AtlasPack/*.json /atlas/AtlasPack/
+ENV QSIRECON_ATLASPACK /atlas/AtlasPack
 
 # Reformat AtlasPack into a BIDS dataset
 COPY scripts/fix_atlaspack.py fix_atlaspack.py
 RUN python fix_atlaspack.py && rm fix_atlaspack.py
 
-# Make it ok for singularity on CentOS
-RUN strip --remove-section=.note.ABI-tag /opt/qt512/lib/libQt5Core.so.5.12.8 \
-    && ldconfig
-
 # Download the built-in atlases
-ENV QSIRECON_ATLAS /atlas/qsirecon_atlases
 RUN bash -c \
-    'mkdir /atlas \
-    && cd  /atlas \
-    && wget -nv https://upenn.box.com/shared/static/40f2m6dzzd8co5jx3cxpgct3zkkwm5d3.xz \
-    && tar xvfJm 40f2m6dzzd8co5jx3cxpgct3zkkwm5d3.xz \
-    && rm 40f2m6dzzd8co5jx3cxpgct3zkkwm5d3.xz'
+    'cd /atlas \
+    && wget -nv https://upenn.box.com/shared/static/5k1tvg6soelxdhi9nvrkry6w0z49ctne.xz \
+    && tar xvfJm 5k1tvg6soelxdhi9nvrkry6w0z49ctne.xz \
+    && rm 5k1tvg6soelxdhi9nvrkry6w0z49ctne.xz'
+ENV QSIRECON_ATLAS /atlas/qsirecon_atlases
 
 # Download the PyAFQ atlases
 RUN pyAFQ download
