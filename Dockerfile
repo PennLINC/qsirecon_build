@@ -9,12 +9,12 @@ ARG TAG_TORTOISE
 ARG TAG_TORTOISECUDA
 
 # COPY can't handle variables, so here we go
+FROM pennlinc/qsirecon-micromamba:${TAG_MICROMAMBA} as build_micromamba
 FROM pennbbl/qsiprep-freesurfer:${TAG_FREESURFER} as build_freesurfer
 FROM pennbbl/qsiprep-ants:${TAG_ANTS} as build_ants
 FROM pennbbl/qsiprep-mrtrix3:${TAG_MRTRIX3} as build_mrtrix3
 FROM pennbbl/qsiprep-3tissue:${TAG_3TISSUE} as build_3tissue
 FROM pennbbl/qsiprep-dsistudio:${TAG_DSISTUDIO} as build_dsistudio
-FROM pennbbl/qsiprep-micromamba:${TAG_MICROMAMBA} as build_micromamba
 FROM pennbbl/qsiprep-afni:${TAG_AFNI} as build_afni
 FROM pennbbl/qsiprep-drbuddi:${TAG_TORTOISE} as build_tortoise
 FROM pennbbl/qsiprep-drbuddicuda:${TAG_TORTOISE} as build_tortoisecuda
@@ -136,16 +136,6 @@ RUN apt-get update -qq \
     && ldconfig \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN echo "Downloading Convert3D ..." \
-    && mkdir -p /opt/convert3d-nightly \
-    && curl -fsSL --retry 5 https://sourceforge.net/projects/c3d/files/c3d/Nightly/c3d-nightly-Linux-x86_64.tar.gz/download \
-    | tar -xz -C /opt/convert3d-nightly --strip-components 1 \
-    --exclude "c3d-1.0.0-Linux-x86_64/lib" \
-    --exclude "c3d-1.0.0-Linux-x86_64/share" \
-    --exclude "c3d-1.0.0-Linux-x86_64/bin/c3d_gui"
-ENV C3DPATH="/opt/convert3d-nightly" \
-    PATH="/opt/convert3d-nightly/bin:$PATH"
-
 # Prepare environment
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -221,26 +211,33 @@ RUN python fetch_templates.py && \
     find $HOME/.cache/templateflow -type d -exec chmod go=u {} + && \
     find $HOME/.cache/templateflow -type f -exec chmod go=u {} +
 
-# Precaching AtlasPack atlases
-RUN mkdir /AtlasPack
-COPY --from=atlaspack /AtlasPack/tpl-fsLR_*.dlabel.nii /AtlasPack/
-COPY --from=atlaspack /AtlasPack/tpl-MNI152NLin6Asym_*.nii.gz /AtlasPack/
-COPY --from=atlaspack /AtlasPack/tpl-MNI152NLin2009cAsym_*.nii.gz /AtlasPack/
-COPY --from=atlaspack /AtlasPack/atlas-4S*.tsv /AtlasPack/
-COPY --from=atlaspack /AtlasPack/*.json /AtlasPack/
-
 # Make it ok for singularity on CentOS
 RUN strip --remove-section=.note.ABI-tag /opt/qt512/lib/libQt5Core.so.5.12.8 \
     && ldconfig
 
+# Prepare atlases
+RUN mkdir /atlas
+
+# Download the AtlasPack atlases
+RUN mkdir /atlas/AtlasPack
+COPY --from=atlaspack /AtlasPack/tpl-fsLR_*.dlabel.nii /atlas/AtlasPack/
+COPY --from=atlaspack /AtlasPack/tpl-MNI152NLin6Asym_*.nii.gz /atlas/AtlasPack/
+COPY --from=atlaspack /AtlasPack/tpl-MNI152NLin2009cAsym_*.nii.gz /atlas/AtlasPack/
+COPY --from=atlaspack /AtlasPack/atlas-4S*.tsv /atlas/AtlasPack/
+COPY --from=atlaspack /AtlasPack/*.json /atlas/AtlasPack/
+ENV QSIRECON_ATLASPACK /atlas/AtlasPack
+
+# Reformat AtlasPack into a BIDS dataset
+COPY scripts/fix_atlaspack.py fix_atlaspack.py
+RUN python fix_atlaspack.py && rm fix_atlaspack.py
+
 # Download the built-in atlases
-ENV QSIRECON_ATLAS /atlas/qsirecon_atlases
 RUN bash -c \
-    'mkdir /atlas \
-    && cd  /atlas \
-    && wget -nv https://upenn.box.com/shared/static/40f2m6dzzd8co5jx3cxpgct3zkkwm5d3.xz \
-    && tar xvfJm 40f2m6dzzd8co5jx3cxpgct3zkkwm5d3.xz \
-    && rm 40f2m6dzzd8co5jx3cxpgct3zkkwm5d3.xz'
+    'cd /atlas \
+    && wget -nv https://upenn.box.com/shared/static/5k1tvg6soelxdhi9nvrkry6w0z49ctne.xz \
+    && tar xvfJm 5k1tvg6soelxdhi9nvrkry6w0z49ctne.xz \
+    && rm 5k1tvg6soelxdhi9nvrkry6w0z49ctne.xz'
+ENV QSIRECON_ATLAS /atlas/qsirecon_atlases
 
 # Download the PyAFQ atlases
 RUN pyAFQ download
