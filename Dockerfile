@@ -15,6 +15,7 @@ FROM pennbbl/qsiprep-ants:${TAG_ANTS} as build_ants
 FROM pennbbl/qsiprep-mrtrix3:${TAG_MRTRIX3} as build_mrtrix3
 FROM pennbbl/qsiprep-3tissue:${TAG_3TISSUE} as build_3tissue
 FROM pennbbl/qsiprep-dsistudio:${TAG_DSISTUDIO} as build_dsistudio
+FROM pennbbl/qsiprep-dsistudio:24.4.24 as build_dsistudio_chen
 FROM pennbbl/qsiprep-afni:${TAG_AFNI} as build_afni
 FROM pennbbl/qsiprep-drbuddi:${TAG_TORTOISE} as build_tortoise
 FROM pennbbl/qsiprep-drbuddicuda:${TAG_TORTOISE} as build_tortoisecuda
@@ -36,6 +37,7 @@ ENV QTDIR="$QT_BASE_DIR" \
     LD_LIBRARY_PATH="$QT_BASE_DIR/lib/x86_64-linux-gnu:$QT_BASE_DIR/lib:$LD_LIBRARY_PATH" \
     PKG_CONFIG_PATH="$QT_BASE_DIR/lib/pkgconfig:$PKG_CONFIG_PATH" \
     PATH="$QT_BASE_DIR/bin:$PATH:/opt/dsi-studio" \
+    PATH="$QT_BASE_DIR/bin:$PATH:/opt/dsi-studio:/opt/dsi-studio-chen" \
     DSI_STUDIO_DEPS="qt512base qt512charts-no-lgpl"
 
 ## MRtrix3
@@ -160,6 +162,8 @@ RUN add-apt-repository ppa:beineri/opt-qt-5.12.8-bionic \
     ${DSI_STUDIO_DEPS} ${MRTRIX3_DEPS} ${TORTOISE_DEPS} wget git binutils \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 COPY --from=build_dsistudio /opt/dsi-studio /opt/dsi-studio
+COPY --from=build_dsistudio_chen /opt/dsi-studio /opt/dsi-studio-chen
+RUN mv /opt/dsi-studio-chen/dsi_studio /opt/dsi-studio-chen/dsi_studio_chen
 
 # Install gcc-9
 RUN add-apt-repository ppa:ubuntu-toolchain-r/test \
