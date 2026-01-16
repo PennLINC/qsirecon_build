@@ -17,7 +17,7 @@ FROM pennlinc/qsiprep-mrtrix3:${TAG_MRTRIX3} as build_mrtrix3
 FROM pennlinc/qsiprep-3tissue:${TAG_3TISSUE} as build_3tissue
 FROM pennlinc/qsiprep-dsistudio:${TAG_DSISTUDIO} as build_dsistudio
 FROM pennlinc/qsiprep-dsistudio-chen:${TAG_DSISTUDIOCHEN} as build_dsistudio_chen
-FROM pennlinc/afni_make_build:${TAG_AFNI} as build_afni
+FROM afni/afni_make_build:${TAG_AFNI} as build_afni
 FROM pennlinc/qsiprep-drbuddi:${TAG_TORTOISE} as build_tortoise
 FROM pennlinc/qsiprep-drbuddicuda:${TAG_TORTOISE} as build_tortoisecuda
 FROM pennlinc/atlaspack:0.1.0 as atlaspack
