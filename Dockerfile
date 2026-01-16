@@ -181,7 +181,7 @@ RUN curl -o pandoc-2.2.2.1-1-amd64.deb -sSL "https://github.com/jgm/pandoc/relea
 
 COPY --from=build_dsistudio /opt/dsi-studio /opt/dsi-studio
 COPY --from=build_dsistudio_chen /opt/dsi-studio /opt/dsi-studio-chen
-RUN mv /opt/dsi-studio-chen/dsi_studio /opt/dsi-studio-chen/dsi_studio_chen
+RUN mv /opt/dsi-studio-chen/dsi_studio /opt/dsi-studio/dsi_studio_chen
 
 # Install ACPC-detect
 WORKDIR /opt/art
