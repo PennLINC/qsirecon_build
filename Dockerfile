@@ -11,15 +11,15 @@ ARG TAG_TORTOISECUDA
 
 # COPY can't handle variables, so here we go
 FROM pennlinc/qsirecon-micromamba:${TAG_MICROMAMBA} as build_micromamba
-FROM pennbbl/qsiprep-freesurfer:${TAG_FREESURFER} as build_freesurfer
-FROM pennbbl/qsiprep-ants:${TAG_ANTS} as build_ants
-FROM pennbbl/qsiprep-mrtrix3:${TAG_MRTRIX3} as build_mrtrix3
-FROM pennbbl/qsiprep-3tissue:${TAG_3TISSUE} as build_3tissue
-FROM pennbbl/qsiprep-dsistudio:${TAG_DSISTUDIO} as build_dsistudio
-FROM pennbbl/qsiprep-dsistudio-chen:${TAG_DSISTUDIOCHEN} as build_dsistudio_chen
-FROM pennbbl/afni_make_build:${TAG_AFNI} as build_afni
-FROM pennbbl/qsiprep-drbuddi:${TAG_TORTOISE} as build_tortoise
-FROM pennbbl/qsiprep-drbuddicuda:${TAG_TORTOISE} as build_tortoisecuda
+FROM pennlinc/qsiprep-freesurfer:${TAG_FREESURFER} as build_freesurfer
+FROM pennlinc/qsiprep-ants:${TAG_ANTS} as build_ants
+FROM pennlinc/qsiprep-mrtrix3:${TAG_MRTRIX3} as build_mrtrix3
+FROM pennlinc/qsiprep-3tissue:${TAG_3TISSUE} as build_3tissue
+FROM pennlinc/qsiprep-dsistudio:${TAG_DSISTUDIO} as build_dsistudio
+FROM pennlinc/qsiprep-dsistudio-chen:${TAG_DSISTUDIOCHEN} as build_dsistudio_chen
+FROM pennlinc/afni_make_build:${TAG_AFNI} as build_afni
+FROM pennlinc/qsiprep-drbuddi:${TAG_TORTOISE} as build_tortoise
+FROM pennlinc/qsiprep-drbuddicuda:${TAG_TORTOISE} as build_tortoisecuda
 FROM pennlinc/atlaspack:0.1.0 as atlaspack
 FROM nvidia/cuda:12.2.2-runtime-ubuntu22.04 as ubuntu
 
