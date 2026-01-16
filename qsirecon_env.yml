@@ -15,7 +15,7 @@ dependencies:
   - pip:
       - bids-validator==1.14.1
       - coverage
-      - dipy==1.8.0
+      - dipy==1.11.0
       - dmri-amico==2.1.0
       - jinja2==3.0.3
       - keras==2.8.0

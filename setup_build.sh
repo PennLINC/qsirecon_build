@@ -18,7 +18,7 @@ export TAG_MICROMAMBA=26.1.7
 export TAG_AFNI=AFNI_25.2.09
 export TAG_TORTOISE=26.1.3
 export TAG_TORTOISECUDA=26.1.3
-export TAG_MICROMAMBA=26.1.8
+export TAG_MICROMAMBA=26.1.9
 
 echo "Settings:"
 echo "----------"
