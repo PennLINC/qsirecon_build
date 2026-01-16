@@ -1,4 +1,4 @@
-# Copied from: fMRIPrep Docker Container Image distribution
+# Copied and modified from: fMRIPrep Docker Container Image distribution
 #
 # MIT License
 #
@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM nvidia/cuda:11.2.2-devel-ubuntu18.04
+FROM nvidia/cuda:12.2.2-devel-ubuntu22.04
 ARG TAG_ANTS
 
 RUN apt-get update && \

@@ -8,15 +8,17 @@ fi
 export BUILD_TAG
 
 # Versions of the components
-export TAG_FREESURFER=23.3.0
-export TAG_ANTS=24.4.24
-export TAG_MRTRIX3=24.4.24
-export TAG_3TISSUE=24.4.24
-export TAG_DSISTUDIO=24.7.4
-export TAG_MICROMAMBA=24.10.1
-export TAG_AFNI=23.3.2
-export TAG_TORTOISE=24.4.29
-export TAG_TORTOISECUDA=24.4.29
+export TAG_FREESURFER=26.1.0
+export TAG_ANTS=26.1.2
+export TAG_MRTRIX3=26.1.0
+export TAG_3TISSUE=26.1.0
+export TAG_DSISTUDIO=26.1.2
+export TAG_DSISTUDIOCHEN=26.1.2
+export TAG_MICROMAMBA=26.1.7
+export TAG_AFNI=AFNI_25.2.09
+export TAG_TORTOISE=26.1.3
+export TAG_TORTOISECUDA=26.1.3
+export TAG_MICROMAMBA=26.1.8
 
 echo "Settings:"
 echo "----------"
@@ -27,10 +29,11 @@ echo "TAG_ANTS=${TAG_ANTS}"
 echo "TAG_MRTRIX3=${TAG_MRTRIX3}"
 echo "TAG_3TISSUE=${TAG_3TISSUE}"
 echo "TAG_DSISTUDIO=${TAG_DSISTUDIO}"
-echo "TAG_MICROMAMBA=${TAG_MICROMAMBA}"
+echo "TAG_DSISTUDIOCHEN=${TAG_DSISTUDIOCHEN}"
 echo "TAG_AFNI=${TAG_AFNI}"
 echo "TAG_TORTOISE=${TAG_TORTOISE}"
 echo "TAG_TORTOISECUDA=${TAG_TORTOISECUDA}"
+echo "TAG_MICROMAMBA=${TAG_MICROMAMBA}"
 
 
 do_build() {
@@ -46,9 +49,10 @@ do_build() {
         --build-arg TAG_MRTRIX3=${TAG_MRTRIX3} \
         --build-arg TAG_3TISSUE=${TAG_3TISSUE} \
         --build-arg TAG_DSISTUDIO=${TAG_DSISTUDIO} \
-        --build-arg TAG_MICROMAMBA=${TAG_MICROMAMBA} \
+        --build-arg TAG_DSISTUDIOCHEN=${TAG_DSISTUDIOCHEN} \
         --build-arg TAG_AFNI=${TAG_AFNI} \
         --build-arg TAG_TORTOISE=${TAG_TORTOISE} \
         --build-arg TAG_TORTOISECUDA=${TAG_TORTOISECUDA} \
+        --build-arg TAG_MICROMAMBA=${TAG_MICROMAMBA} \
         .
 }

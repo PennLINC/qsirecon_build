@@ -3,6 +3,7 @@ ARG TAG_ANTS
 ARG TAG_MRTRIX3
 ARG TAG_3TISSUE
 ARG TAG_DSISTUDIO
+ARG TAG_DSISTUDIOCHEN
 ARG TAG_MICROMAMBA
 ARG TAG_AFNI
 ARG TAG_TORTOISE
@@ -15,12 +16,12 @@ FROM pennbbl/qsiprep-ants:${TAG_ANTS} as build_ants
 FROM pennbbl/qsiprep-mrtrix3:${TAG_MRTRIX3} as build_mrtrix3
 FROM pennbbl/qsiprep-3tissue:${TAG_3TISSUE} as build_3tissue
 FROM pennbbl/qsiprep-dsistudio:${TAG_DSISTUDIO} as build_dsistudio
-FROM pennbbl/qsiprep-dsistudio:24.4.24 as build_dsistudio_chen
-FROM pennbbl/qsiprep-afni:${TAG_AFNI} as build_afni
+FROM pennbbl/qsiprep-dsistudio-chen:${TAG_DSISTUDIOCHEN} as build_dsistudio_chen
+FROM pennbbl/afni_make_build:${TAG_AFNI} as build_afni
 FROM pennbbl/qsiprep-drbuddi:${TAG_TORTOISE} as build_tortoise
 FROM pennbbl/qsiprep-drbuddicuda:${TAG_TORTOISE} as build_tortoisecuda
 FROM pennlinc/atlaspack:0.1.0 as atlaspack
-FROM nvidia/cuda:11.1.1-runtime-ubuntu18.04 as ubuntu
+FROM nvidia/cuda:12.2.2-runtime-ubuntu22.04 as ubuntu
 
 FROM ubuntu
 
@@ -29,16 +30,14 @@ COPY --from=build_ants /opt/ants /opt/ants
 ENV ANTSPATH="/opt/ants/bin" \
     LD_LIBRARY_PATH="/opt/ants/lib:$LD_LIBRARY_PATH" \
     PATH="$PATH:/opt/ants/bin" \
-    ANTS_DEPS="zlib1g-dev"
+    ANTS_DEPS="zlib1g"
 
 ## DSI Studio
-ENV QT_BASE_DIR="/opt/qt512"
-ENV QTDIR="$QT_BASE_DIR" \
-    LD_LIBRARY_PATH="$QT_BASE_DIR/lib/x86_64-linux-gnu:$QT_BASE_DIR/lib:$LD_LIBRARY_PATH" \
-    PKG_CONFIG_PATH="$QT_BASE_DIR/lib/pkgconfig:$PKG_CONFIG_PATH" \
-    PATH="$QT_BASE_DIR/bin:$PATH:/opt/dsi-studio" \
-    PATH="$QT_BASE_DIR/bin:$PATH:/opt/dsi-studio:/opt/dsi-studio-chen" \
-    DSI_STUDIO_DEPS="qt512base qt512charts-no-lgpl"
+ENV DSI_STUDIO_DEPS="libqt5charts5 libqt5opengl5 libqt5svg5 libqt5gui5 libqt5widgets5 libqt5sql5 libqt5network5" \
+    QT_PLUGIN_PATH="/usr/lib/x86_64-linux-gnu/qt5/plugins" \
+    QML2_IMPORT_PATH="/usr/lib/x86_64-linux-gnu/qt5/qml" \
+    PATH="/opt/dsi-studio:/opt/dsi-studio/dsi_studio_64:$PATH:/opt/dsi-studio-chen"
+
 
 ## MRtrix3
 COPY --from=build_mrtrix3 /opt/mrtrix3-latest /opt/mrtrix3-latest
@@ -70,15 +69,39 @@ ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
 RUN chmod a+rx /opt/freesurfer/bin/mri_synthseg /opt/freesurfer/bin/mri_synthstrip
 
 ## AFNI
-COPY --from=build_afni /opt/afni-latest /opt/afni-latest
-ENV PATH="$PATH:/opt/afni-latest" \
-    AFNI_INSTALLDIR=/opt/afni-latest \
+# Find libraries with `ldd $BINARIES | grep afni`
+COPY --link --from=build_afni \
+    /opt/afni/install/libf2c.so  \
+    /opt/afni/install/libmri.so  \
+    /opt/afni/install/libSUMA.so  \
+    /usr/local/lib/
+COPY --link --from=build_afni \
+    /opt/afni/install/3dAutobox \
+    /opt/afni/install/3dAutomask \
+    /opt/afni/install/3dFWHMx \
+    /opt/afni/install/3dQwarp \
+    /opt/afni/install/3dSeg \
+    /opt/afni/install/3dSkullStrip \
+    /opt/afni/install/3dTcat \
+    /opt/afni/install/3dTshift \
+    /opt/afni/install/3dTsplit4D \
+    /opt/afni/install/3dTstat \
+    /opt/afni/install/3dUnifize \
+    /opt/afni/install/3dWarp \
+    /opt/afni/install/3dZeropad \
+    /opt/afni/install/3dcalc \
+    /opt/afni/install/3drefit \
+    /opt/afni/install/3dresample \
+    /opt/afni/install/3dvolreg \
+    /usr/local/bin/
+
+ENV PATH="$PATH:/usr/local/bin" \
+    AFNI_INSTALLDIR=/usr/local/bin \
     AFNI_IMSAVE_WARNINGS=NO
 
 ## TORTOISE
 COPY --from=build_tortoise /src/TORTOISEV4/bin /src/TORTOISEV4/bin
 COPY --from=build_tortoise /src/TORTOISEV4/settings /src/TORTOISEV4/settings
-COPY --from=build_tortoise /usr/local/boost176 /usr/local/boost176
 COPY --from=build_tortoisecuda /src/TORTOISEV4/bin/*cuda /src/TORTOISEV4/bin/
 ENV PATH="$PATH:/src/TORTOISEV4/bin" \
     TORTOISE_DEPS="fftw3"
@@ -95,47 +118,48 @@ ENV PATH="/opt/conda/envs/qsiprep/bin:$PATH"
 
 RUN apt-get update -qq \
     && apt-get install -y -q --no-install-recommends \
-           apt-utils \
+           bc \
+           binutils \
            bzip2 \
            ca-certificates \
            curl \
-           ed \
-           bc \
+           wget \
+           git \
+           gnupg \
            gsl-bin \
+           graphviz \
+           libblas3 \
+           libboost-filesystem1.74.0 \
+           libboost-program-options1.74.0 \
+           libboost-serialization1.74.0 \
+           libboost-system1.74.0 \
+           libboost-thread1.74.0 \
+           libfftw3-3 \
            libglib2.0-0 \
-           libglu1-mesa-dev \
+           libgl1 \
+           libglu1-mesa \
            libglw1-mesa \
            libgomp1 \
            libjpeg62 \
+           liblapack3 \
            libpng16-16 \
            libquadmath0 \
+           libtiff5 \
            libxm4 \
            libxmu6 \
            libxt6 \
-           perl \
-           libtiff5 \
            netpbm \
-           software-properties-common \
+           perl \
            tcsh \
+           unzip \
            xfonts-base \
            xvfb \
-           zlib1g-dev \
+           zlib1g \
+           ${MRTRIX3_DEPS} \
+           ${DSI_STUDIO_DEPS} \
+           ${TORTOISE_DEPS} \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && curl -sSL --retry 5 -o /tmp/libxp6.deb https://upenn.box.com/shared/static/reyyundn0l3guvjzghrrv6t4w6md2tjd.deb \
-    && dpkg -i /tmp/libxp6.deb \
-    && rm /tmp/libxp6.deb \
-    && curl -sSL --retry 5 -o /tmp/libpng.deb http://snapshot.debian.org/archive/debian-security/20160113T213056Z/pool/updates/main/libp/libpng/libpng12-0_1.2.49-1%2Bdeb7u2_amd64.deb \
-    && dpkg -i /tmp/libpng.deb \
-    && rm /tmp/libpng.deb \
-    && apt-get install -f --no-install-recommends \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && gsl2_path="$(find / -name 'libgsl.so.19' || printf '')" \
-    && if [ -n "$gsl2_path" ]; then \
-         ln -sfv "$gsl2_path" "$(dirname $gsl2_path)/libgsl.so.0"; \
-    fi \
-    && ldconfig \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Prepare environment
@@ -155,21 +179,9 @@ RUN curl -o pandoc-2.2.2.1-1-amd64.deb -sSL "https://github.com/jgm/pandoc/relea
     dpkg -i pandoc-2.2.2.1-1-amd64.deb && \
     rm pandoc-2.2.2.1-1-amd64.deb
 
-# Install qt5.12.8
-RUN add-apt-repository ppa:beineri/opt-qt-5.12.8-bionic \
-    && apt-get update \
-    && apt install -y --no-install-recommends \
-    ${DSI_STUDIO_DEPS} ${MRTRIX3_DEPS} ${TORTOISE_DEPS} wget git binutils \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 COPY --from=build_dsistudio /opt/dsi-studio /opt/dsi-studio
 COPY --from=build_dsistudio_chen /opt/dsi-studio /opt/dsi-studio-chen
 RUN mv /opt/dsi-studio-chen/dsi_studio /opt/dsi-studio-chen/dsi_studio_chen
-
-# Install gcc-9
-RUN add-apt-repository ppa:ubuntu-toolchain-r/test \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends libstdc++6 \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install ACPC-detect
 WORKDIR /opt/art
@@ -179,7 +191,6 @@ RUN cd /opt/art \
     | tar xz --strip-components 1
 
 # Install Workbench
-RUN apt-get update && apt-get install -y curl unzip binutils
 RUN mkdir /opt/workbench && \
     curl -sSLO https://www.humanconnectome.org/storage/app/media/workbench/workbench-linux64-v1.5.0.zip && \
     unzip workbench-linux64-v1.5.0.zip -d /opt && \
@@ -200,10 +211,6 @@ ENV \
     IS_DOCKER_8395080871=1 \
     ARTHOME="/opt/art" \
     DIPY_HOME=/home/qsiprep/.dipy \
-    QTDIR=$QT_BASE_DIR \
-    PATH=$QT_BASE_DIR/bin:$PATH \
-    LD_LIBRARY_PATH=$QT_BASE_DIR/lib/x86_64-linux-gnu:$QT_BASE_DIR/lib:$LD_LIBRARY_PATH \
-    PKG_CONFIG_PATH=$QT_BASE_DIR/lib/pkgconfig:$PKG_CONFIG_PATH \
     LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/conda/envs/qsirecon/lib/python3.10/site-packages/nvidia/cudnn/lib
 
 WORKDIR /root/
@@ -216,8 +223,9 @@ RUN python fetch_templates.py && \
     find $HOME/.cache/templateflow -type f -exec chmod go=u {} +
 
 # Make it ok for singularity on CentOS
-RUN strip --remove-section=.note.ABI-tag /opt/qt512/lib/libQt5Core.so.5.12.8 \
-    && ldconfig
+RUN if [ -f /usr/lib/x86_64-linux-gnu/libQt5Core.so.5 ]; then \
+      strip --remove-section=.note.ABI-tag /usr/lib/x86_64-linux-gnu/libQt5Core.so.5; \
+    fi && ldconfig
 
 # Prepare atlases
 RUN mkdir /atlas
