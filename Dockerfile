@@ -154,6 +154,7 @@ RUN apt-get update -qq \
            unzip \
            xfonts-base \
            xvfb \
+           xz-utils \
            zlib1g \
            ${MRTRIX3_DEPS} \
            ${DSI_STUDIO_DEPS} \
