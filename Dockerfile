@@ -20,7 +20,7 @@ FROM pennlinc/qsiprep-dsistudio-chen:${TAG_DSISTUDIOCHEN} as build_dsistudio_che
 FROM afni/afni_make_build:${TAG_AFNI} as build_afni
 FROM pennlinc/qsiprep-drbuddi:${TAG_TORTOISE} as build_tortoise
 FROM pennlinc/qsiprep-drbuddicuda:${TAG_TORTOISE} as build_tortoisecuda
-FROM pennlinc/atlaspack:0.1.0 as atlaspack
+FROM pennlinc/atlaspack:0.2.0 as atlaspack
 FROM nvidia/cuda:12.2.2-runtime-ubuntu22.04 as ubuntu
 
 FROM ubuntu
@@ -231,18 +231,9 @@ RUN if [ -f /usr/lib/x86_64-linux-gnu/libQt5Core.so.5 ]; then \
 # Prepare atlases
 RUN mkdir /atlas
 
-# Download the AtlasPack atlases
-RUN mkdir /atlas/AtlasPack
-COPY --from=atlaspack /AtlasPack/tpl-fsLR_*.dlabel.nii /atlas/AtlasPack/
-COPY --from=atlaspack /AtlasPack/tpl-MNI152NLin6Asym_*.nii.gz /atlas/AtlasPack/
-COPY --from=atlaspack /AtlasPack/tpl-MNI152NLin2009cAsym_*.nii.gz /atlas/AtlasPack/
-COPY --from=atlaspack /AtlasPack/atlas-4S*.tsv /atlas/AtlasPack/
-COPY --from=atlaspack /AtlasPack/*.json /atlas/AtlasPack/
+# Copy the AtlasPack BIDS-Atlas dataset (tpl-<space>/ layout)
+COPY --from=atlaspack /AtlasPack /atlas/AtlasPack
 ENV QSIRECON_ATLASPACK /atlas/AtlasPack
-
-# Reformat AtlasPack into a BIDS dataset
-COPY scripts/fix_atlaspack.py fix_atlaspack.py
-RUN python fix_atlaspack.py && rm fix_atlaspack.py
 
 # Download the built-in atlases
 RUN bash -c \
